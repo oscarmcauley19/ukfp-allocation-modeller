@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: ukfp-allocation-frontend
+    build:
+      context: ../ukfp-allocation-frontend
+      dockerfile: Dockerfile.local
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../ukfp-allocation-frontend:/app
+      - /app/node_modules # Prevent overwriting node_modules
+    working_dir: /app
+    environment:
+      - VITE_API_HOST=ukfp-allocation-api
+      - VITE_API_PORT=5000
+
+  api:
+    container_name: ukfp-allocation-api
+    build:
+      context: ../ukfp-allocation-api
+      dockerfile: Dockerfile.local
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../ukfp-allocation-api:/app
+    environment:
+      - PORT=5000
+      - REDIS_HOST=ukfp-allocation-redis
+      - RABBITMQ_URL=amqp://guest:guest@ukfp-allocation-rabbitmq:5672//
+    depends_on:
+      - rabbitmq
+      - redis
+
+  worker:
+    container_name: ukfp-allocation-worker
+    build:
+      context: ../ukfp-allocation-worker
+      dockerfile: Dockerfile
+    volumes:
+      - ../ukfp-allocation-worker:/app
+      - /app/node_modules # Prevent overwriting node_modules
+    working_dir: /app/src
+    command: celery -A celery_app worker --loglevel=info --pool=solo
+    environment:
+      - BROKER_URL=amqp://guest:guest@ukfp-allocation-rabbitmq:5672//
+      - REDIS_HOST=ukfp-allocation-redis
+      - REDIS_PORT=6379
+    depends_on:
+      - rabbitmq
+      - redis
+
+  rabbitmq:
+    container_name: ukfp-allocation-rabbitmq
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    container_name: ukfp-allocation-redis
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
