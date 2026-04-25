@@ -1,0 +1,12 @@
+.whole {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 20px;
+  margin: auto;
+  width: 0.4wh;
+  height: 0.4vh;
+  border-radius: 10px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+}

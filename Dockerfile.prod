@@ -1,0 +1,16 @@
+# Base image
+FROM node:24.15-alpine3.22
+
+# set working directory
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+RUN npm install
+
+COPY . ./
+
+EXPOSE 5173
+
+# start app
+CMD ["npm", "run", "dev"]
