@@ -8,7 +8,7 @@ resource "aws_s3_bucket_acl" "frontend_acl" {
   depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_acl_ownership]
 }
 
-resource "aws_s3_bucket_ownership_controls" "ownership_controls" {
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_acl_ownership" {
   bucket = aws_s3_bucket.frontend.id
 
   rule {
