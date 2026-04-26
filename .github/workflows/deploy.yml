@@ -81,4 +81,4 @@ jobs:
             exit 1
           fi
           echo "Syncing ../../frontend/dist to s3://$BUCKET"
-          aws s3 sync ../../frontend/dist s3://$BUCKET --delete
+          aws s3 sync "../../frontend/dist" "s3://$BUCKET" --delete
