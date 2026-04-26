@@ -80,7 +80,7 @@ export const DnDTable = ({
   data: DeaneryModel[];
   setData: (newRanking: DeaneryModel[]) => void;
 }) => {
-  const columns = useMemo<ColumnDef<DeaneryModel>[]>(
+  const columns = useMemo<ColumnDef<DeaneryModel, string>[]>(
     () => [
       // Create a dedicated drag handle column. Alternatively, you could just set up dnd events on the rows themselves.
       {
@@ -104,15 +104,17 @@ export const DnDTable = ({
       {
         accessorKey: "ratio",
         header: "Ratio",
-        cell: ({ row, getValue }) => (
-          <Tooltip
-            title={`For every place available in ${row.original.deaneryName}, ${getValue()} people put it as their first choice.`}
+        cell: ({ row, getValue }) => {
+          const value = getValue();
+
+          return <Tooltip
+            title={`For every place available in ${row.original.deaneryName}, ${value} people put it as their first choice.`}
           >
-            <Typography color={scale(getValue()).toString()}>
-              {getValue()}
+            <Typography color={scale([value]).toString()}>
+              {value}
             </Typography>
           </Tooltip>
-        ),
+        }
       },
     ],
     [],

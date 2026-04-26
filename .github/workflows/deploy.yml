@@ -1,0 +1,84 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "If true, run terraform plan only and skip secret creation/upload/invalidate"
+        required: false
+        default: "false"
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: |
+          npm install
+
+      - name: Linters
+        working-directory: frontend
+        run: |
+          npm run lint
+          npm run format
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm run build
+
+  deploy:
+    name: Deploy infrastructure and frontend
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform init & apply
+        working-directory: infrastructure/terraform
+        run: |
+          terraform init -input=false
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Dry run requested — running 'terraform plan' only"
+            terraform plan -input=false -out=tfplan
+            terraform show -no-color tfplan > plan.txt || true
+            echo "Saved plan to terraform/plan.txt"
+            exit 0
+          fi
+          terraform apply -auto-approve -input=false
+
+      - name: Upload frontend to S3
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          set -euo pipefail
+          cd infrastructure/terraform
+          BUCKET=$(terraform output -raw frontend_bucket)
+          if [ -z "$BUCKET" ]; then
+            echo "No frontend bucket output from Terraform"
+            exit 1
+          fi
+          cd ..
+          echo "Syncing frontend/dist to s3://$BUCKET"
+          aws s3 sync frontend/dist s3://$BUCKET --delete
