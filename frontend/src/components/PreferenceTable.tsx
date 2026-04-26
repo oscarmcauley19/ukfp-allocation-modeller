@@ -107,14 +107,14 @@ export const DnDTable = ({
         cell: ({ row, getValue }) => {
           const value = getValue();
 
-          return <Tooltip
-            title={`For every place available in ${row.original.deaneryName}, ${value} people put it as their first choice.`}
-          >
-            <Typography color={scale([value]).toString()}>
-              {value}
-            </Typography>
-          </Tooltip>
-        }
+          return (
+            <Tooltip
+              title={`For every place available in ${row.original.deaneryName}, ${value} people put it as their first choice.`}
+            >
+              <Typography color={scale([value]).toString()}>{value}</Typography>
+            </Tooltip>
+          );
+        },
       },
     ],
     [],
