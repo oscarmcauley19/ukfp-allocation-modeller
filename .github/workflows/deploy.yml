@@ -38,6 +38,12 @@ jobs:
         run: |
           npm run build
 
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/dist
+
   deploy:
     name: Deploy infrastructure and frontend
     needs: build
@@ -69,6 +75,12 @@ jobs:
             exit 0
           fi
           terraform apply -auto-approve -input=false
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/dist
 
       - name: Upload frontend to S3
         working-directory: infrastructure/terraform
