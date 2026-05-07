@@ -138,7 +138,8 @@ export const DnDTable = ({
   // reorder rows after drag & drop
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    console.log("Drag Ended", active, over);
+    console.log(event);
+    // console.log("Drag Ended", active, over);
     if (active && over && active.id !== over.id) {
       const oldIndex = dataIds.indexOf(active.id);
       const newIndex = dataIds.indexOf(over.id);

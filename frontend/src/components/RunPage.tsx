@@ -10,7 +10,6 @@ import {
   Typography,
 } from "@mui/material";
 
-import styles from "../styles/RunPage.module.css";
 import { createSimulationJob, getSimulationResults } from "../lib/simulation";
 import { useJobProgress } from "../lib/hooks/useJobProgress";
 import { getOptions } from "../lib/rankingOptions";
@@ -23,6 +22,7 @@ export default function RunPage() {
   const runOptions = [10, 25, 50, 100];
 
   const updateRanking = (newRanking: DeaneryModel[]) => {
+    console.log(newRanking);
     setRanking(newRanking);
     localStorage.setItem(
       "ranking",
@@ -113,9 +113,9 @@ export default function RunPage() {
   }, [progress]);
 
   return (
-    <div className={styles.splitView}>
-      <div className={styles.textArea}>
-        <Typography textAlign={"left"} variant="h5">
+    <div className="grid grid-cols-2 gap-x-25 gap-y-6">
+      <div className="flex flex-col">
+        <Typography textAlign={"left"} variant="h5" sx={{ marginBottom: 3 }}>
           1. Pick your ranking
         </Typography>
         <Typography textAlign={"left"} variant="body1">
@@ -124,15 +124,15 @@ export default function RunPage() {
           deanery.
         </Typography>
       </div>
-      <div className={styles.textArea}>
-        <Typography textAlign={"left"} variant="h5">
+      <div className="flex flex-col">
+        <Typography textAlign={"left"} variant="h5" sx={{ marginBottom: 3 }}>
           2. Run a simulation
         </Typography>
-        <Typography textAlign={"left"} variant="body1">
+        <Typography textAlign={"left"} variant="body1" sx={{ marginBottom: 3 }}>
           Click &apos;run simulation&apos; to find out how you would fare with
           your selected deanery preferences.
         </Typography>
-        <div className={styles.runSimulationControls}>
+        <div className="flex flex-row items-center content-center gap-5">
           <FormControl sx={{ minWidth: 80 }}>
             <InputLabel id="number-of-runs-label">Runs</InputLabel>
             <Select
@@ -157,13 +157,13 @@ export default function RunPage() {
           <Button onClick={handlePerformSimClicked}>Run Simulation</Button>
         </div>
       </div>
-      <div className={styles.leftSide}>
-        <div className={styles.rankingPanel}>
+      <div className="pt-7.5">
+        <div className="flex flex-col">
           {ranking && <DnDTable data={ranking} setData={updateRanking} />}
         </div>
       </div>
 
-      <div className={styles.rightSide}>
+      <div className="pt-7.5">
         {error ? (
           <Alert severity="error" sx={{ marginX: 4 }}>
             {error}
